@@ -10,7 +10,12 @@ body{
 }
 main{
     margin: 0 6%;
+    display: flex;
+    order: 2;
+    flex-grow: 2;
 }
+
+
 
 #github{
     width:20px ;
@@ -30,7 +35,8 @@ main{
 #s1{
     position: absolute;
     right: 5%;
-    top:21%
+    top:21%;
+    
 }   
 
 
@@ -49,14 +55,23 @@ main{
 .doboz2{
     max-width: 400px;
 }
-img{
-    size:90%;
-    width: 70%;
-    height: 90%;
-}
+
+    
+
 #s1{
-    display: inline;
+
+height: 600px;
+width:600px;
 }
+.s1{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: url(/312015246_489104759807604_4611186649456021511_n.jpg);
+}
+
 h1{
     font-size:300%;
     margin-top: 13px;
