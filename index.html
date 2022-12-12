@@ -1,13 +1,83 @@
 <!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN/SIGN UP</title>
-    <link rel="stylesheet" href="css.css">
-</head>
-<body>
-    <h1>EZ it a cím!</h1>
-</body>
+<!doctype html>
+<html>
+  <head>
+    <title>Login and Sign Up</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+
+      .login-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: inline-block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      input[type="submit"] {
+        background-color: #4caf50;
+        color: white;
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      .error {
+        color: red;
+        margin-bottom: 20px;
+      }
+
+      .signup-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Login</h1>
+      <form action="/login" method="post">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" />
+        </div>
+        <div class="form-group">
+          <input type="submit" value="Login" />
+        </div>
+        
+        <a href="/signup" class="signup-link">Don't have an account? Sign up here.</a>
+      </form>
+    </div>
+  </body>
 </html>
