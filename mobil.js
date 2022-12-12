@@ -11,13 +11,22 @@
 //   div2.style.border = "4px solid black";
 // }
 
+window.onscroll = function() {
+    window.scrollTo(0, 0);
+  }
 console.log("================================");
+let element = document.getElementById('my-element');
+// element.className = 'body';
 
+// Set the color of the element to red
+// document.body.style.zoom = 1;
 // Call the checkScreenWidth function when the page loads
 // window.addEventListener("load", checkScreenWidth);
 window.onload = function() {
     var browserWidth = document.body.clientWidth;
+    var browserHeight = document.body.clientHeight;
     if(browserWidth < 1000) {
-        document.getElementById('signup-link').style.paddingBottom = '1100px';
+        document.getElementById('signup-link').style.marginBottom = (browserHeight-211)+'px';
+        document.body.style.zoom = 1;
     }
 };
