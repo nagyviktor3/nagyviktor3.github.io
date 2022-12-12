@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="hu"></html>
+<html>
+  <head>
+    <title>Login and Sign Up</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="5" />
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #1b1b1b;
+        color: white;
+      }
+
+      .login-container {
+        max-width: 400px;
+        padding: 0 20px;
+        margin: auto;
+        font-size: 45px;
+
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: slategray;
+      }
+      h1 {
+        margin: 20px 00px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+        color: white;
+        font-size: 30px;
+      }
+
+      label {
+        display: inline-block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      input[type="submit"] {
+        background-color: #4caf50;
+        color: rgb(255, 255, 255);
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      .error {
+        color: rgb(50, 0, 0);
+        margin-bottom: 20px;
+      }
+
+      .signup-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 25px;
+        padding-bottom: 20px;
+        color: #1b1b1b;
+      }
+      .send {
+        font-size: 20px;
+      }
+      .no {
+        font-size: 12px;
+        margin-left: 12px;
+        color: rgb(206, 206, 206);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Sign up</h1>
+      <form action="/signup" method="post">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" name="username" id="email" />
+          <div class="no"><p>Nem kötelező!</p></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" />
+        </div>
+        <div class="form-group">
+          <input class="send" type="submit" value="sign up" />
+        </div>
+        <a href="/index.html" class="signup-link"> Login here.</a>
+
+      </form>
+    </div>
+  </body>
+</html>

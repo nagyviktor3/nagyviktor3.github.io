@@ -1,23 +1,33 @@
 <!DOCTYPE html>
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Login and Sign Up</title>
     <style>
       body {
         font-family: sans-serif;
+        background-color: #1b1b1b;
+        color: white;
       }
 
       .login-container {
         max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
+        padding: 0 20px;
+        margin: auto;
+        font-size: 45px;
+
         border: 1px solid #ccc;
         border-radius: 4px;
+        background-color: slategray;
+      }
+      h1 {
+        margin: 20px 00px;
       }
 
       .form-group {
         margin-bottom: 15px;
+        color: white;
+        font-size: 30px;
       }
 
       label {
@@ -37,7 +47,7 @@
 
       input[type="submit"] {
         background-color: #4caf50;
-        color: white;
+        color: rgb(255, 255, 255);
         padding: 8px;
         border: none;
         border-radius: 4px;
@@ -49,7 +59,7 @@
       }
 
       .error {
-        color: red;
+        color: rgb(50, 0, 0);
         margin-bottom: 20px;
       }
 
@@ -57,6 +67,12 @@
         display: block;
         text-align: center;
         margin-top: 20px;
+        font-size: 25px;
+        padding-bottom: 20px;
+        color: #1b1b1b;
+      }
+      .send {
+        font-size: 20px;
       }
     </style>
   </head>
@@ -73,10 +89,12 @@
           <input type="password" name="password" id="password" />
         </div>
         <div class="form-group">
-          <input type="submit" value="Login" />
+          <input class="send" type="submit" value="Login" />
         </div>
-        
-        <a href="/signup" class="signup-link">Don't have an account? Sign up here.</a>
+        <a href="/sign.html" class="signup-link"
+          >Don't have an account? <br />
+          Sign up here.</a
+        >
       </form>
     </div>
   </body>
