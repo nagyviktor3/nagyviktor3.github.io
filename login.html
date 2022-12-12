@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
+<html lang="hu"></html>
 <html>
   <head>
-    
     <title>Login and Sign Up</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <meta http-equiv="refresh" content="5" /> -->
+    <script src="mobil.js"></script>
     <style>
       body {
         font-family: sans-serif;
@@ -78,7 +82,7 @@
     </style>
   </head>
   <body>
-    <div class="login-container">
+    <div class="login-container" id="login-container">
       <h1>Login</h1>
       <form action="/login" method="post">
         <div class="form-group">
@@ -92,7 +96,7 @@
         <div class="form-group">
           <input class="send" type="submit" value="Login" />
         </div>
-        <a href="/sign" class="signup-link"
+        <a href="/sign" class="signup-link" id="signup-link"
           >Don't have an account? <br />
           Sign up here.</a
         >
