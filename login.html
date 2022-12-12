@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <!DOCTYPE html>
-<html lang="hu"></html>
 <html>
   <head>
+    
     <title>Login and Sign Up</title>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="5" />
     <style>
       body {
         font-family: sans-serif;
@@ -42,8 +38,7 @@
       }
 
       input[type="text"],
-      input[type="password"],
-      input[type="email"] {
+      input[type="password"] {
         display: block;
         width: 100%;
         padding: 8px;
@@ -80,36 +75,27 @@
       .send {
         font-size: 20px;
       }
-      .no {
-        font-size: 12px;
-        margin-left: 12px;
-        color: rgb(206, 206, 206);
-      }
     </style>
   </head>
   <body>
     <div class="login-container">
-      <h1>Sign up</h1>
-      <form action="/signup" method="post">
+      <h1>Login</h1>
+      <form action="/login" method="post">
         <div class="form-group">
           <label for="username">Username:</label>
           <input type="text" name="username" id="username" />
         </div>
         <div class="form-group">
-          <label for="email">Email:</label>
-          <input type="email" name="username" id="email" />
-          <div class="no"><p>Nem kötelező!</p></div>
-        </div>
-
-        <div class="form-group">
           <label for="password">Password:</label>
           <input type="password" name="password" id="password" />
         </div>
         <div class="form-group">
-          <input class="send" type="submit" value="sign up" />
+          <input class="send" type="submit" value="Login" />
         </div>
-        <a href="/login" class="signup-link"> Login here.</a>
-
+        <a href="/sign" class="signup-link"
+          >Don't have an account? <br />
+          Sign up here.</a
+        >
       </form>
     </div>
   </body>
