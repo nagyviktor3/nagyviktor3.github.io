@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <p>23</p>
+  <script>
+    if (0==1)
+      window.location.href = "login";
+    
+      
+    
+    $url = "https://script.google.com/macros/s/AKfycbxfLPV8X1TDRBZZNJ53xf8Hwh6c6XlCXJZAfi2TgCqgYu73nDGIjn2pdKU9ZqztGRsKBA/exec";
+    $postData = [
+       "action" => "login",
+       "email" => $_POST['email'],
+       "password" => $_POST['password']
+    ];
+    
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+       CURLOPT_FOLLOWLOCATION => true,
+       CURLOPT_RETURNTRANSFER => true,
+       CURLOPT_POSTFIELDS => $postData
+    ]);
+    
+    $result = curl_exec($ch);
+    $result = json_decode($result, 1);
+    
+    if($result['status'] == "success"){
+       $_SESSION['user'] = $result['data'];
+       header("location: dashboard.php");
+    }else{
+       $_SESSION['error'] = $result['message'];
+       header("location: login.php");
+    }
+    </script>
+    
+</body>
+</html>
