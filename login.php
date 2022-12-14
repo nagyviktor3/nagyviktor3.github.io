@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="hu"></html>
 <html>
@@ -85,17 +86,17 @@
   <body>
     <div class="login-container" id="login-container">
       <h1>Login</h1>
-      <form action="/login" method="post">
+      <form action="login_action.php" method="post">
         <div class="form-group">
           <label for="username">Username:</label>
-          <input type="text" name="username" id="username" />
+          <input type="text" name="username" id="email" />
         </div>
         <div class="form-group">
           <label for="password">Password:</label>
           <input type="password" name="password" id="password" />
         </div>
         <div class="form-group">
-          <input class="send" type="submit" value="Login" />
+          <input id="login" class="send" type="submit" value="LOGIN" />
         </div>
         <a href="/sign" class="signup-link" id="signup-link"
           >Don't have an account? <br />
