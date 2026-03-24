@@ -1,44 +1,1132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Interaktív Hidrosztatika Szimuláció</title>
+  <style>
+    /* Alapértelmezett reset és betűtípus */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Fejléc stílusok */
+    header {
+      flex: 0 0 auto;
+      text-align: center;
+      padding: 1rem 0;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.2rem;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    /* Fő elrendezés */
+    .main-content {
+      display: flex;
+      flex: 1;
+      padding: 1rem 2rem;
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Szimulációs vászon konténere */
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      border-radius: 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: linear-gradient(180deg, #1e293b 0%, #020617 100%);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: block;
+      height: 100%;
+      max-height: 800px;
+      margin: auto 0;
+    }
+
+    .canvas-container::-webkit-scrollbar {
+      width: 10px;
+    }
+    .canvas-container::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 5px;
+    }
+
+    canvas {
+      width: 100%;
+      display: block;
+      cursor: grab;
+    }
+    
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    /* Üveghatású panel css (Glassmorphism) */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Vezérlőpanel stílusok */
+    .control-panel {
+      width: 380px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .control-panel > * {
+      flex-shrink: 0;
+    }
+
+    .control-panel h2 {
+      font-size: 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.75rem;
+      color: #e2e8f0;
+      margin-bottom: 0.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Gombok */
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.6rem 0.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .styro-btn { background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%); color: #0f172a; }
+    .cork-btn { background: linear-gradient(135deg, #d4a373 0%, #b88656 100%); }
+    .wood-btn { background: linear-gradient(135deg, #8B5A2B 0%, #6b4423 100%); }
+    .ice-btn { background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%); color: #0f172a;}
+    .brick-btn { background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); }
+    .alu-btn { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); }
+    .iron-btn { background: linear-gradient(135deg, #4b5563 0%, #1f2937 100%); }
+    .gold-btn { background: linear-gradient(135deg, #fbbf24 0%, #b45309 100%); color: #0f172a; }
+
+    .danger-btn { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); margin-top: 0.5rem;}
+    .danger-btn:hover { background: rgba(239, 68, 68, 0.4); color: white;}
+
+    /* Csúszka (Slider) stílusok */
+    .slider-container {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+      margin: 10px 0;
+    }
+
+    input[type=range]:focus {
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: linear-gradient(to right, #eab308, #38bdf8, #1e40af);
+      border-radius: 4px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      border: 2px solid #0f172a;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    /* Adatok megjelenítése */
+    .info-group {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 150px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px dashed rgba(255,255,255,0.1);
+    }
+    
+    .stat-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .stat-label { color: #94a3b8; }
+    .stat-value { font-weight: 600; font-family: monospace; font-size: 1rem;}
+    .stat-value.force { color: #f472b6; }
+    .stat-value.gravity { color: #a78bfa; }
+    
+    .object-card {
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-top: 0.75rem;
+    }
+
+    #objectStatsList {
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    
+    #objectStatsList::-webkit-scrollbar, .fluid-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    #objectStatsList::-webkit-scrollbar-thumb, .fluid-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+    }
+    
+    .fluid-list-container {
+      max-height: 180px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    
+    .fluid-card {
+      background: rgba(255,255,255,0.05);
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    .hint {
+      color: #64748b;
+      font-size: 0.85rem;
+      font-style: italic;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .main-content {
+        flex-direction: column;
+        height: auto;
+      }
+      .canvas-container {
+        height: 60vh;
+      }
+      .control-panel {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <p>23</p>
-  <script>
-    if (0==1)
-      window.location.href = "login";
-    
+
+  <header>
+    <h1>Arkhimédész Törvénye</h1>
+    <p>Hidrosztatika, Felhajtóerő és Sűrűség Interaktív Szimuláció</p>
+  </header>
+
+  <div class="main-content">
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="simCanvas"></canvas>
+    </div>
+
+    <div class="control-panel glass-panel">
+      <h2>Választópanel</h2>
       
-    
-    $url = "https://script.google.com/macros/s/AKfycbxfLPV8X1TDRBZZNJ53xf8Hwh6c6XlCXJZAfi2TgCqgYu73nDGIjn2pdKU9ZqztGRsKBA/exec";
-    $postData = [
-       "action" => "login",
-       "email" => $_POST['email'],
-       "password" => $_POST['password']
-    ];
-    
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-       CURLOPT_FOLLOWLOCATION => true,
-       CURLOPT_RETURNTRANSFER => true,
-       CURLOPT_POSTFIELDS => $postData
-    ]);
-    
-    $result = curl_exec($ch);
-    $result = json_decode($result, 1);
-    
-    if($result['status'] == "success"){
-       $_SESSION['user'] = $result['data'];
-       header("location: dashboard.php");
-    }else{
-       $_SESSION['error'] = $result['message'];
-       header("location: login.php");
+      <div class="control-group">
+        <h3>Tárgyak a vízbe</h3>
+        <div class="button-grid">
+          <button id="addBalloon" class="btn" style="background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);">🎈 Hélium Lufi</button>
+          <button id="addStyrofoam" class="btn styro-btn">☁️ Hungarocell</button>
+          <button id="addCork" class="btn cork-btn">🍾 Parafa</button>
+          <button id="addWood" class="btn wood-btn">🪵 Fa Kocka</button>
+          <button id="addIce" class="btn ice-btn">🧊 Jégtömb</button>
+          <button id="addEbony" class="btn" style="background: linear-gradient(135deg, #44403c 0%, #1c1917 100%);">🌳 Ébenfa</button>
+          <button id="addBrick" class="btn brick-btn">🧱 Tégla</button>
+          <button id="addAluminum" class="btn alu-btn">🪙 Alumínium</button>
+          <button id="addIron" class="btn iron-btn">🎱 Vasgolyó</button>
+          <button id="addGold" class="btn gold-btn">👑 Aranytömb</button>
+        </div>
+        <button id="clearObjects" class="btn danger-btn">🗑️ Összes Törlése</button>
+      </div>
+
+      <div class="control-group slider-container">
+        <h3>Folyadékok hozzáadása</h3>
+        <div class="button-grid" style="margin-top: 0.5rem; gap: 0.5rem;">
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(255, 255, 255, 0.15);" onclick="addFluid(1, 'Levegő/Gáz')">💨 Levegő Öntés</button>
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(234, 179, 8, 0.4);" onclick="addFluid(800, 'Olaj')">🛢️ Olaj Öntés</button>
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(56, 189, 248, 0.4);" onclick="addFluid(1000, 'Víz')">💧 Víz Öntés</button>
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(30, 64, 175, 0.5);" onclick="addFluid(1400, 'Sós Víz')">🌊 Sós Víz</button>
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(148, 163, 184, 0.6);" onclick="addFluid(13600, 'Higany')">🧪 Higany Öntés</button>
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(168, 85, 247, 0.6);" onclick="addFluid(25000, 'Sci-Fi Folyadék')">🌌 Sci-Fi Öntés</button>
+          <button class="btn" style="padding: 0.5rem; font-size: 0.85rem; background: rgba(239, 68, 68, 0.4); grid-column: span 2;" onclick="clearFluids()">🚰 Folyadékok Leeresztése</button>
+        </div>
+      </div>
+
+      <div class="info-group">
+        <h3>Aktív Folyadékok</h3>
+        <div id="fluidsList" class="fluid-list-container fluid-scroll">
+          <p class="hint">Üres a tartály!</p>
+        </div>
+      </div>
+
+      <div class="info-group">
+        <h3>Aktuális Fizikai Erők</h3>
+        <div id="objectStatsList">
+          <p class="hint">Kattints egy elemre, vagy adj hozzá a tartályhoz, hogy lásd az erők egyensúlyát a valós időben!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  //========================================================================================
+  // FIZIKAI MOTOR ÉS MEGJELENÍTÉS (VANILLA JS)
+  //========================================================================================
+
+  // HTML elemek lekérése
+  const canvas = document.getElementById('simCanvas');
+  const ctx = canvas.getContext('2d');
+  const canvasContainer = document.getElementById('canvasContainer');
+  const densitySlider = document.getElementById('densitySlider');
+  const densityValDisplay = document.getElementById('densityVal');
+  const objectStatsList = document.getElementById('objectStatsList');
+
+  // Fizikai és vizuális állandók
+  let canvasWidth, canvasHeight;
+  const PIXELS_PER_METER = 100;    // Skálázás: 100 pixel egyenlő 1 méterrel
+  const GRAVITY = 9.81;            // Gravitációs gyorsulás (m/s^2)
+  const WATER_LEVEL_RATIO = 0.35;  // A vízfelszín a vászon 35%-ánál kezdődik fentről
+  let WATER_LEVEL_Y = 0;           // Később kerül kiszámításra a canvas magassága alapján
+
+  // Szimulációs állapot
+  let fluids = [
+    { id: 1, density: 1000, heightPx: 300, name: 'Víz' }
+  ];
+  let objects = [];
+  let draggedObj = null;
+  let lastTime = performance.now();
+
+  window.addFluid = function(density, name) {
+    let existing = fluids.find(f => f.density === density);
+    if (existing) {
+      existing.heightPx += 120; // Növeljük a magasságot sokkal gyorsabban
+    } else {
+      fluids.push({ id: Math.random(), density: density, heightPx: 120, name: name });
     }
-    </script>
+    resizeCanvas();
     
+    // Auto-scroll a folyadék hozzáadásakor a képernyő aljára
+    setTimeout(() => {
+      canvasContainer.scrollTo({ top: canvasContainer.scrollHeight, behavior: 'smooth' });
+    }, 10);
+
+    updateFluidsUI();
+    updateStatsHTML();
+  };
+
+  window.clearFluids = function() {
+    fluids = [];
+    resizeCanvas();
+    updateFluidsUI();
+    updateStatsHTML();
+  };
+
+  // Resize canvas funkció
+  function resizeCanvas() {
+    canvasWidth = canvasContainer.clientWidth;
+    
+    let baseHeight = canvasContainer.clientHeight;
+    
+    let totalFluidHeight = 0;
+    if (typeof fluids !== 'undefined') {
+      totalFluidHeight = fluids.reduce((sum, f) => sum + f.heightPx, 0);
+    }
+    
+    // A felső garantált légüres tér
+    const AIR_GAP = 250;
+    
+    // A canvas magassága kiterjed, ha a folyadékok összessége meghaladja a tartály látható magasságát
+    canvasHeight = Math.max(baseHeight, totalFluidHeight + AIR_GAP);
+    
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    WATER_LEVEL_Y = canvasHeight * WATER_LEVEL_RATIO;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  //========================================================================================
+  // TÁRGYAK DEFINÍCIÓJA OSZTÁLYOKKAL
+  //========================================================================================
+
+  class PhysicsObject {
+    constructor(x, y, density, type) {
+      this.density = density; // kg/m^3
+      this.type = type;
+      this.id = Math.random().toString(36).substr(2, 9);
+      
+      this.x = x;
+      this.y = y;
+      this.vx = 0;
+      this.vy = 0;
+      this.ax = 0;
+      this.ay = 0;
+      
+      this.mass = 0;
+      this.volume = 0;
+      this.submergedVolume = 0;
+      
+      this.buoyantForce = 0;
+      this.gravityForce = 0;
+      this.netForce = 0;
+      
+      this.isHovered = false;
+      this.isDragged = false;
+    }
+    
+    // Alapértelmezett frissítés Euler integrálással
+    update(dt) {
+      if (this.isDragged) {
+        this.vx = 0;
+        this.vy = 0;
+        return; // Ha húzzuk, nem hatnak rá ezek a fizikai erők
+      }
+
+      // 1. Gravitációs erő kiszámítása (F = m * g)
+      this.gravityForce = this.mass * GRAVITY;
+
+      // 2 & 3. Bemerült térfogat és felhajtóerő
+      this.calculateForcesAndVolumes();
+
+      // 4. Eredő erő (F_eredő = Felhajtóerő - Gravitációs erő)
+      this.netForce = this.buoyantForce - this.gravityForce;
+      const netForceY = this.gravityForce - this.buoyantForce;
+
+      // 5. Gyorsulás
+      this.ay = netForceY / this.mass;
+
+      // 6. Sebesség és Pozíció frissítése
+      this.vy += this.ay * dt;
+      if(this.vy > 10) this.vy = 10;
+      if(this.vy < -10) this.vy = -10;
+
+      // Folyadékközegellenállás
+      if (this.submergedVolume > 0) {
+        const damping = 0.95;
+        this.vy *= Math.pow(damping, dt * 60);
+      }
+
+      this.y += (this.vy * PIXELS_PER_METER) * dt;
+
+      // Ütközés a medence aljával
+      this.handleFloorCollision();
+      
+      // Apró vízszintes visszatérítő erő a középpont felé
+      if (this.x < 50) this.x += 1;
+      if (this.x > canvasWidth - 50) this.x -= 1;
+    }
+
+    calculateForcesAndVolumes() {
+      this.submergedVolume = 0;
+      this.buoyantForce = 0;
+      
+      let currentY = canvasHeight;
+      fluids.sort((a, b) => b.density - a.density);
+      
+      fluids.forEach(f => {
+        f.bottomY = currentY;
+        f.topY = currentY - f.heightPx;
+        currentY = f.topY;
+        
+        let vSubLayer = this.getVolumeInLayer(f.topY, f.bottomY);
+        if (vSubLayer > 0) {
+          this.submergedVolume += vSubLayer;
+          this.buoyantForce += f.density * vSubLayer * GRAVITY;
+        }
+      });
+    }
+
+    getVolumeInLayer(topY, bottomY) { return 0; }
+  }
+
+  // Négyszögletű test (Fa, Jég)
+  class RectObject extends PhysicsObject {
+    constructor(x, y, displaySize, density, type, color, borderColor, label) {
+      super(x, y, density, type);
+      this.width = displaySize;
+      this.height = displaySize;
+      this.color = color;
+      this.borderColor = borderColor;
+      this.label = label || (this.type === 'wood' ? 'Fa' : 'Jég');
+      
+      // Térfogat számítása méterben (2D-s kiterjesztés 1m vastagsággal)
+      const wMeter = this.width / PIXELS_PER_METER;
+      const hMeter = this.height / PIXELS_PER_METER;
+      this.volume = wMeter * hMeter * 1; // 3. dimenzió = 1 méter
+      
+      // m = ρ * V
+      this.mass = this.density * this.volume; 
+    }
+
+    getVolumeInLayer(topY, bottomY) {
+      const objTop = this.y - this.height / 2;
+      const objBottom = this.y + this.height / 2;
+      
+      const intersectTop = Math.max(objTop, topY);
+      const intersectBottom = Math.min(objBottom, bottomY);
+      
+      if (intersectTop < intersectBottom) {
+        const intersectHeightPx = intersectBottom - intersectTop;
+        const submergedFraction = intersectHeightPx / this.height;
+        return this.volume * submergedFraction;
+      }
+      return 0;
+    }
+
+    handleFloorCollision() {
+      if (this.y + this.height / 2 > canvasHeight) {
+        this.y = canvasHeight - this.height / 2;
+        this.vy *= -0.3; // Pattanás
+      }
+    }
+
+    draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      if (this.isHovered || this.isDragged) {
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 3;
+      } else {
+        ctx.lineWidth = 1;
+      }
+      
+      ctx.fillStyle = this.color;
+      ctx.strokeStyle = this.borderColor;
+      ctx.beginPath();
+      ctx.rect(-this.width/2, -this.height/2, this.width, this.height);
+      ctx.fill();
+      ctx.stroke();
+      
+      // Anyag név ráírása
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.font = "bold 14px sans-serif";
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 4;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(this.label, 0, 0);
+      ctx.shadowBlur = 0;
+      
+      ctx.restore();
+    }
+
+    isPointInside(px, py) {
+      return px >= this.x - this.width/2 && px <= this.x + this.width/2 &&
+             py >= this.y - this.height/2 && py <= this.y + this.height/2;
+    }
+  }
+
+  // Gömb test (Vasgolyó)
+  class CircleObject extends PhysicsObject {
+    constructor(x, y, radiusPx, density, type, color, label) {
+      super(x, y, density, type);
+      this.radius = radiusPx;
+      this.color = color || '#1f2937';
+      this.label = label || 'Vas';
+      
+      // Térfogat számítás: kezeljük ezt is henger alakúként a 2D vásznon az egyszerű vizuális követhetőség miatt
+      // Terület * 1m mélység
+      const rMeter = this.radius / PIXELS_PER_METER;
+      this.volume = Math.PI * rMeter * rMeter * 1; 
+      
+      this.mass = this.density * this.volume; 
+    }
+
+    circleAreaBelow(lineY) {
+      const objBottom = this.y + this.radius;
+      if (lineY >= objBottom) return Math.PI * this.radius * this.radius;
+      if (lineY <= this.y - this.radius) return 0;
+      
+      const h = objBottom - lineY;
+      const r = this.radius;
+      const d = r - h;
+      const theta = 2 * Math.acos(d / r);
+      return 0.5 * r * r * (theta - Math.sin(theta));
+    }
+
+    getVolumeInLayer(topY, bottomY) {
+      const objTop = this.y - this.radius;
+      const objBottom = this.y + this.radius;
+      
+      const intersectTop = Math.max(objTop, topY);
+      const intersectBottom = Math.min(objBottom, bottomY);
+      
+      if (intersectTop < intersectBottom) {
+        const areaToTop = this.circleAreaBelow(intersectTop);
+        const areaToBottom = this.circleAreaBelow(intersectBottom);
+        const layerAreaPx = areaToBottom - areaToTop;
+        const totalAreaPx = Math.PI * this.radius * this.radius;
+        return this.volume * (layerAreaPx / totalAreaPx);
+      }
+      return 0;
+    }
+
+    handleFloorCollision() {
+      if (this.y + this.radius > canvasHeight) {
+        this.y = canvasHeight - this.radius;
+        this.vy *= -0.2; // Nehéz, kis pattanás
+      }
+    }
+
+    draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      if (this.isHovered || this.isDragged) {
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 3;
+      } else {
+        ctx.lineWidth = 1;
+      }
+      
+      // Radiális gradiens a 3D hatásért
+      const grad = ctx.createRadialGradient(-this.radius*0.3, -this.radius*0.3, this.radius*0.1, 0, 0, this.radius);
+      grad.addColorStop(0, 'rgba(255,255,255,0.6)');
+      grad.addColorStop(1, this.color);
+      
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.font = "bold 14px sans-serif";
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 4;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(this.label, 0, 0);
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+    }
+
+    isPointInside(px, py) {
+      const dx = px - this.x;
+      const dy = py - this.y;
+      return dx*dx + dy*dy <= this.radius*this.radius;
+    }
+  }
+
+  //========================================================================================
+  // ESEMÉNY FIGYELŐK (Kezelés és vezérlés)
+  //========================================================================================
+
+  // Tárgyak hozzáadása fentről (legyenek ejtve)
+  function createObjectRandomX(type) {
+    const startY = 40; // a vászon tetején
+    const startX = 60 + Math.random() * (canvasWidth - 120);
+    
+    if (type === 'balloon') {
+      objects.push(new CircleObject(startX, startY, 30, 0.18, 'balloon', '#ef4444', 'Lufi'));
+    } else if (type === 'styrofoam') {
+      objects.push(new RectObject(startX, startY, 70, 30, 'styrofoam', '#f1f5f9', '#94a3b8', 'Hungarocell'));
+    } else if (type === 'cork') {
+      objects.push(new RectObject(startX, startY, 60, 240, 'cork', '#d4a373', '#8A5A44', 'Parafa'));
+    } else if (type === 'wood') {
+      objects.push(new RectObject(startX, startY, 80, 600, 'wood', '#8B5A2B', '#5c3a1b', 'Fa'));
+    } else if (type === 'ice') {
+      objects.push(new RectObject(startX, startY, 90, 920, 'ice', 'rgba(125, 211, 252, 0.8)', '#38bdf8', 'Jég'));
+    } else if (type === 'ebony') {
+      objects.push(new RectObject(startX, startY, 80, 1100, 'ebony', '#292524', '#0c0a09', 'Ébenfa'));
+    } else if (type === 'brick') {
+      objects.push(new RectObject(startX, startY, 100, 2000, 'brick', '#b91c1c', '#7f1d1d', 'Tégla'));
+    } else if (type === 'aluminum') {
+      objects.push(new CircleObject(startX, startY, 35, 2700, 'aluminum', '#94a3b8', 'Alumínium'));
+    } else if (type === 'iron') {
+      objects.push(new CircleObject(startX, startY, 40, 7800, 'iron', '#4b5563', 'Vas'));
+    } else if (type === 'gold') {
+      objects.push(new RectObject(startX, startY, 45, 19300, 'gold', '#fbbf24', '#b45309', 'Arany'));
+    }
+    updateStatsHTML();
+  }
+
+  document.getElementById('addBalloon').addEventListener('click', () => createObjectRandomX('balloon'));
+  document.getElementById('addStyrofoam').addEventListener('click', () => createObjectRandomX('styrofoam'));
+  document.getElementById('addCork').addEventListener('click', () => createObjectRandomX('cork'));
+  document.getElementById('addWood').addEventListener('click', () => createObjectRandomX('wood'));
+  document.getElementById('addIce').addEventListener('click', () => createObjectRandomX('ice'));
+  document.getElementById('addEbony').addEventListener('click', () => createObjectRandomX('ebony'));
+  document.getElementById('addBrick').addEventListener('click', () => createObjectRandomX('brick'));
+  document.getElementById('addAluminum').addEventListener('click', () => createObjectRandomX('aluminum'));
+  document.getElementById('addIron').addEventListener('click', () => createObjectRandomX('iron'));
+  document.getElementById('addGold').addEventListener('click', () => createObjectRandomX('gold'));
+  document.getElementById('clearObjects').addEventListener('click', () => { objects = []; updateStatsHTML(); });
+
+  // Egér interakciók a canvas-on (Drag and Drop)
+  let mouseX = 0;
+  let mouseY = 0;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    mouseX = (e.clientX - rect.left) * scaleX;
+    mouseY = (e.clientY - rect.top) * scaleY;
+    
+    let isAnyHovered = false;
+    // Iterate in reverse so top-most visually is checked first
+    for (let i = objects.length - 1; i >= 0; i--) {
+      const obj = objects[i];
+      if (!draggedObj && obj.isPointInside(mouseX, mouseY)) {
+        obj.isHovered = true;
+        isAnyHovered = true;
+      } else {
+        obj.isHovered = false;
+      }
+    }
+    canvas.style.cursor = isAnyHovered ? 'grab' : 'default';
+
+    if (draggedObj) {
+      draggedObj.x = mouseX + dragOffsetX;
+      draggedObj.y = mouseY + dragOffsetY;
+      canvas.style.cursor = 'grabbing';
+      // Erők újra kiszámítása a real-time UI-hoz mikor húzzuk be a vízbe
+      draggedObj.submergedVolume = draggedObj.calculateSubmergedVolume(WATER_LEVEL_Y);
+      draggedObj.gravityForce = draggedObj.mass * GRAVITY;
+      if (draggedObj.submergedVolume > 0) {
+        draggedObj.buoyantForce = fluidDensity * draggedObj.submergedVolume * GRAVITY;
+      } else {
+        draggedObj.buoyantForce = 0;
+      }
+      updateStatsHTML();
+    }
+  });
+
+  canvas.addEventListener('mousedown', (e) => {
+    for (let i = objects.length - 1; i >= 0; i--) {
+      if (objects[i].isPointInside(mouseX, mouseY)) {
+        draggedObj = objects[i];
+        draggedObj.isDragged = true;
+        dragOffsetX = draggedObj.x - mouseX;
+        dragOffsetY = draggedObj.y - mouseY;
+        // Mozgatjuk a tömb végére, hogy legfelül rajzolódjon ki
+        objects.push(objects.splice(i, 1)[0]);
+        updateStatsHTML(); // Highlight the dragged element
+        break;
+      }
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (draggedObj) {
+      draggedObj.isDragged = false;
+      // Reset velocity on drop
+      draggedObj.vy = 0;
+      draggedObj = null;
+    }
+  });
+
+
+  //========================================================================================
+  // RAJZOLÁSI ÉS RENDERELÉSI FUNKCIÓK
+  //========================================================================================
+
+  // Folyadék színének interpolációja a sűrűség alapján
+  function getFluidColor(density) {
+    let r1, g1, b1, a1;
+    let r2, g2, b2, a2;
+    let factor;
+    
+    if (density <= 800) {
+      // Levegő (1) -> Olaj (800)
+      r1=255; g1=255; b1=255; a1=0.05;
+      r2=234; g2=179; b2=8; a2=0.3;
+      factor = (density - 1) / 799;
+    } else if (density <= 1000) {
+      // Olaj (800) -> Víz (1000)
+      r1=234; g1=179; b1=8; a1=0.3;
+      r2=56; g2=189; b2=248; a2=0.4;
+      factor = (density - 800) / 200;
+    } else if (density <= 1400) {
+      // Víz (1000) -> Sós víz (1400)
+      r1=56; g1=189; b1=248; a1=0.4;
+      r2=30; g2=64; b2=175; a2=0.5;
+      factor = (density - 1000) / 400;
+    } else if (density <= 13600) {
+      // Sós víz (1400) -> Higany (13600)
+      r1=30; g1=64; b1=175; a1=0.5;
+      r2=148; g2=163; b2=184; a2=0.8;
+      factor = (density - 1400) / 12200;
+    } else {
+      // Higany (13600) -> Szuper sűrű (25000)
+      r1=148; g1=163; b1=184; a1=0.8;
+      r2=168; g2=85; b2=247; a2=0.9;
+      factor = (density - 13600) / 11400;
+    }
+
+    factor = Math.max(0, Math.min(1, factor));
+    const r = Math.round(r1 + factor * (r2 - r1));
+    const g = Math.round(g1 + factor * (g2 - g1));
+    const b = Math.round(b1 + factor * (b2 - b1));
+    const a = (a1 + factor * (a2 - a1)).toFixed(3);
+
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  function drawFluids() {
+    fluids.sort((a, b) => b.density - a.density);
+    let currentY = canvasHeight;
+    
+    fluids.forEach(f => {
+      f.bottomY = currentY;
+      f.topY = currentY - f.heightPx;
+      currentY = f.topY;
+      
+      ctx.fillStyle = getFluidColor(f.density);
+      ctx.fillRect(0, f.topY, canvasWidth, f.heightPx);
+
+      ctx.beginPath();
+      ctx.moveTo(0, f.topY);
+      ctx.lineTo(canvasWidth, f.topY);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, f.topY);
+      for(let i = 0; i < canvasWidth; i += 20) {
+        ctx.lineTo(i, f.topY + Math.sin(i * 0.05 + performance.now()*0.002) * 2);
+      }
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255,255,255,0.6)";
+      ctx.font = "bold 14px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(f.name + " (" + f.density + " kg/m³)", 10, f.bottomY - 10);
+    });
+    
+    WATER_LEVEL_Y = currentY;
+  }
+
+  // Megjelenítő UI frissítése az oldalpanelen
+  let lastUIUpdateTime = 0;
+  function updateStatsHTML() {
+    const now = performance.now();
+    // Throttle UI updates to 10 FPS to prevent DOM thrashing
+    if (now - lastUIUpdateTime < 100 && !draggedObj) return; 
+    lastUIUpdateTime = now;
+
+    if (objects.length === 0) {
+      objectStatsList.innerHTML = `<p class="hint">Nincs tárgy a vízben!</p>`;
+      return;
+    }
+
+    let htmlContent = "";
+
+    // Végigiterálunk minden elemen, visszafelé (legújabb legfölül)
+    for (let i = objects.length - 1; i >= 0; i--) {
+      let targetObj = objects[i];
+      let objectNameTag = "";
+      let borderCol = "";
+      
+      if (targetObj.type === 'balloon') {
+        objectNameTag = "🎈 Hélium Lufi"; borderCol = "#ef4444";
+      } else if (targetObj.type === 'styrofoam') {
+        objectNameTag = "☁️ Hungarocell"; borderCol = "#cbd5e1";
+      } else if (targetObj.type === 'cork') {
+        objectNameTag = "🍾 Parafa"; borderCol = "#d4a373";
+      } else if (targetObj.type === 'wood') {
+        objectNameTag = "🪵 Fa Kocka"; borderCol = "#8B5A2B";
+      } else if (targetObj.type === 'ice') {
+        objectNameTag = "🧊 Jégtömb"; borderCol = "#38bdf8";
+      } else if (targetObj.type === 'ebony') {
+        objectNameTag = "🌳 Ébenfa"; borderCol = "#44403c";
+      } else if (targetObj.type === 'brick') {
+        objectNameTag = "🧱 Tégla"; borderCol = "#b91c1c";
+      } else if (targetObj.type === 'aluminum') {
+        objectNameTag = "🪙 Alumínium"; borderCol = "#94a3b8";
+      } else if (targetObj.type === 'iron') {
+        objectNameTag = "🎱 Vasgolyó"; borderCol = "#9ca3af";
+      } else if (targetObj.type === 'gold') {
+        objectNameTag = "👑 Arany"; borderCol = "#fbbf24";
+      }
+
+      let isFloating = Math.abs(targetObj.buoyantForce - targetObj.gravityForce) < 0.1 && targetObj.buoyantForce > 0;
+      let isSunk = targetObj.y + (targetObj.height ? targetObj.height/2 : targetObj.radius) >= canvasHeight - 1;
+
+      let statusText = "Zuhan";
+      if (targetObj.isDragged) statusText = "Kézben tartva";
+      else if (targetObj.submergedVolume === 0) statusText = "Levegőben";
+      else if (isFloating) statusText = "Úszik / Lebeg";
+      else if (isSunk) statusText = "Elsüllyedt";
+      else if (targetObj.buoyantForce > targetObj.gravityForce) statusText = "Emelkedik";
+      else statusText = "Süllyed";
+
+      const vSub = targetObj.submergedVolume.toFixed(3);
+      const subPercent = Math.min(100, Math.round((targetObj.submergedVolume / targetObj.volume) * 100));
+
+      // Extra kiemelés a fókuszált elemnek
+      let shadowStyle = targetObj.isHovered || targetObj.isDragged ? "box-shadow: 0 0 10px rgba(255,255,255,0.2);" : "";
+
+      htmlContent += `
+        <div class="object-card" style="border-left-color: ${borderCol}; ${shadowStyle}">
+          <div style="font-weight: bold; margin-bottom: 8px; font-size: 1.1em; color: white;">${objectNameTag}</div>
+          
+          <div class="stat-row">
+            <span class="stat-label">Állapot:</span>
+            <span style="color: ${isFloating ? '#22c55e' : (isSunk ? '#ef4444' : '#eab308')}">${statusText}</span>
+          </div>
+          
+          <div class="stat-row">
+            <span class="stat-label">Tömeg:</span>
+            <span class="stat-value">${targetObj.mass.toFixed(0)} kg (ρ: ${targetObj.density})</span>
+          </div>
+          
+          <div class="stat-row">
+            <span class="stat-label">Bemerültség (V):</span>
+            <span class="stat-value">${subPercent}% (${vSub} m³)</span>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">Erők (Fg / Ff):</span>
+            <span class="stat-value" style="font-size: 0.9em;"><span class="gravity">${targetObj.gravityForce.toFixed(0)} N</span> / <span class="force">${targetObj.buoyantForce.toFixed(0)} N</span></span>
+          </div>
+        </div>
+      `;
+    }
+    
+    objectStatsList.innerHTML = htmlContent;
+  }
+
+  //========================================================================================
+  // FŐ CIKLUS (GAME LOOP)
+  //========================================================================================
+
+  function simulationLoop(currentTime) {
+    const rawDt = (currentTime - lastTime) / 1000; // Másodpercben
+    lastTime = currentTime;
+    
+    // Stabil dt használata a fix fizikai update-hoz, hogy ne szálljon el a szimuláció, ha megakad a tab tartalom (max 30 ms (approx 33fps))
+    const dt = Math.min(rawDt, 0.03); 
+
+    // Vászon törlése
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    // 1. Háttér folyadék rajzolása
+    drawFluids();
+
+    // 2. Objektumok frissítése
+    objects.forEach(obj => {
+      obj.update(dt);
+    });
+
+    // 2.5 Tárgyak ütközése egymással (Gyors AABB rezolúció)
+    for (let i = 0; i < objects.length; i++) {
+      for (let j = i + 1; j < objects.length; j++) {
+        let a = objects[i];
+        let b = objects[j];
+        
+        let aW = a.width || a.radius * 2;
+        let aH = a.height || a.radius * 2;
+        let bW = b.width || b.radius * 2;
+        let bH = b.height || b.radius * 2;
+        
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        
+        let absDX = Math.abs(dx);
+        let absDY = Math.abs(dy);
+        
+        let sumW = (aW + bW) / 2;
+        let sumH = (aH + bH) / 2;
+        
+        if (absDX < sumW && absDY < sumH) {
+          let overlapX = sumW - absDX;
+          let overlapY = sumH - absDY;
+          
+          if (overlapX < overlapY) {
+            let sign = Math.sign(dx) || 1;
+            if (a.isDragged && !b.isDragged) { b.x += overlapX * sign; }
+            else if (b.isDragged && !a.isDragged) { a.x -= overlapX * sign; }
+            else if (!a.isDragged && !b.isDragged) { 
+              let totalMass = a.mass + b.mass;
+              let ratioA = b.mass / totalMass;
+              let ratioB = a.mass / totalMass;
+              a.x -= overlapX * ratioA * sign; 
+              b.x += overlapX * ratioB * sign; 
+            }
+            a.vx *= 0.8; b.vx *= 0.8;
+          } else {
+            let sign = Math.sign(dy) || 1;
+            if (a.isDragged && !b.isDragged) { b.y += overlapY * sign; }
+            else if (b.isDragged && !a.isDragged) { a.y -= overlapY * sign; }
+            else if (!a.isDragged && !b.isDragged) { 
+              let totalMass = a.mass + b.mass;
+              let ratioA = b.mass / totalMass;
+              let ratioB = a.mass / totalMass;
+              a.y -= overlapY * ratioA * sign; 
+              b.y += overlapY * ratioB * sign; 
+            }
+            a.vy *= 0.5; b.vy *= 0.5;
+          }
+        }
+      }
+    }
+
+    // Rajzolás
+    objects.forEach(obj => {
+      obj.draw(ctx);
+    });
+
+    // 3. Információs UI folyamatos frissítése
+    updateStatsHTML();
+
+    // Loop!
+    requestAnimationFrame(simulationLoop);
+  }
+
+  // Folyadék panelek frissítése
+  function updateFluidsUI() {
+    let html = "";
+    if (fluids.length === 0) {
+      html = '<p class="hint">Üres a tartály!</p>';
+    } else {
+      fluids.forEach(f => {
+        let fCol = getFluidColor(f.density);
+        html += `
+          <div class="fluid-card" style="border-left: 3px solid ${fCol}">
+            <div style="font-weight: bold; color: white; display: flex; justify-content: space-between;">
+              <span>${f.name}</span>
+              <span style="font-size:0.8rem; font-weight:normal; align-self:center;">${f.heightPx.toFixed(0)} L</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+              <input type="range" min="1" max="25000" step="1" value="${f.density}" oninput="updateFluidDensity(${f.id}, this.value)" style="flex:1; margin:0; height:4px;">
+              <span style="font-size:0.85rem; color:#38bdf8; min-width:60px; text-align:right;">${f.density}</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('fluidsList').innerHTML = html;
+  }
+
+  window.updateFluidDensity = function(id, val) {
+    let f = fluids.find(fl => fl.id === id);
+    if (f) {
+      f.density = parseFloat(val);
+      updateFluidsUI();
+      updateStatsHTML();
+    }
+  }
+
+  // Első Frame elindítása
+  updateFluidsUI();
+  requestAnimationFrame(simulationLoop);
+
+</script>
 </body>
 </html>

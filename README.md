@@ -1,1 +1,0 @@
-# nagyviktor3.github.io
